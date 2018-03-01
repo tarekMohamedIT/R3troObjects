@@ -1,6 +1,7 @@
 package core;
 
 import exceptions.AttributeExistsException;
+import flags.TagFlag;
 import interfaces.XmlObjectInterface;
 import sun.net.www.protocol.file.FileURLConnection;
 
@@ -14,7 +15,6 @@ import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static helpers.TagFlags.*;
 import static helpers.Regex.*;
 
 /**
@@ -29,10 +29,9 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
     /**
      * Section 3: The global variables
      */
-    private static int tagCount = 0;
     private String text;
     private String tagName;
-    private int tagType;
+    private TagFlag tagType;
     private XmlObject parentObject;
     private ArrayList<ObjectAttribute> attributeList;
     private ArrayList<XmlObject> nodesList;
@@ -52,7 +51,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
         this.text = "";
         this.attributeList = new ArrayList<>();
         this.nodesList = new ArrayList<>();
-        tagType = TAG_OPEN_CLOSE;
+        tagType = TagFlag.Open_Close;
     }
 
     /**
@@ -67,7 +66,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
         this.parentObject = parentObject;
         this.attributeList = new ArrayList<>();
         this.nodesList = new ArrayList<>();
-        tagType = TAG_OPEN_CLOSE;
+        tagType = TagFlag.Open_Close;
     }
 
     /**
@@ -83,7 +82,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
         this.parentObject = parentObject;
         this.attributeList = attributeList;
         this.nodesList = new ArrayList<>();
-        tagType = TAG_OPEN_CLOSE;
+        tagType = TagFlag.Open_Close;
     }
 
     /**
@@ -92,7 +91,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
      * 1- Open-close
      * @return An integer indicating the type of the tag
      */
-    public int getTagType() {
+    public TagFlag getTagType() {
         return tagType;
     }
 
@@ -185,8 +184,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
     public void addNode(XmlObject node) {
         node.parentObject = this;
         nodesList.add(node);
-        tagCount++;
-        tagType = TAG_OPEN;
+        tagType = TagFlag.Open;
         if (!isInParsingMode)
             this.text = this.text + "{TAG}\n";
     }
@@ -198,7 +196,6 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
     @Override
     public void removeNode(int position) {
         nodesList.remove(position);
-        tagCount--;
 
         String[] textParts = text.split("\\{TAG\\}");
         StringBuilder textTmp = new StringBuilder(textParts[0]);
@@ -213,8 +210,8 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
         text = textTmp.toString();
 
-        if (nodesList.size() == 0) tagType = TAG_OPEN_CLOSE;
-        else tagType = TAG_OPEN;
+        if (nodesList.size() == 0) tagType = TagFlag.Open_Close;
+        else tagType = TagFlag.Open;
     }
 
     /**
@@ -224,7 +221,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
     public void clearNodes() {
         for (XmlObject object : nodesList) object.parentObject = null;
         nodesList.clear();
-        tagType = TAG_OPEN_CLOSE;
+        tagType = TagFlag.Open_Close;
     }
 
     /**
@@ -525,8 +522,8 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
         int startIndex = matcher.end();
         int endIndex;
-        int currentTagState;
-        int lastTagState = TAG_OPEN;
+        TagFlag currentTagState;
+        TagFlag lastTagState = TagFlag.Open;
 
         while (matcher.find()) { //for each tag exists in the html page :
 
@@ -534,14 +531,14 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
             //Step 1 : tags parsing
             currentTagState = handleXmlTag(tag);
-            if (currentTagState != TAG_USELESS) {
+            if (currentTagState != TagFlag.Useless) {
 
                 endIndex = matcher.start();
 
-                if (currentTagState == TAG_COMMENT_END)
-                    currentTagState = TAG_CLOSE;
-                else if (currentTagState == TAG_COMMENT)
-                    currentTagState = TAG_OPEN;
+                if (currentTagState == TagFlag.Comment_Close)
+                    currentTagState = TagFlag.Close;
+                else if (currentTagState == TagFlag.Comment_Open)
+                    currentTagState = TagFlag.Open;
 
                 parseText(xmlScript.substring(startIndex, endIndex), currentTagState, lastTagState);
                 startIndex = matcher.end();
@@ -568,7 +565,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
      * @param tag The tag string required for handling.
      * @return An integer indicating the current tag flag.
      */
-    private static int handleXmlTag(String tag) {
+    private static TagFlag handleXmlTag(String tag) {
 
         if (!isInComment) {
 
@@ -580,7 +577,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
                                 , currentXmlObject
                                 , XmlObject.HelperMethods.getXmlTagAttributes(tag)));
 
-                return TAG_OPEN_CLOSE;
+                return TagFlag.Open_Close;
             }
 
             //Step 1-B : Opened tags
@@ -595,7 +592,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
                     isInComment = true;
                     currentXmlObject.addNode(new XmlObject("comment", "", currentXmlObject, new ArrayList<>()));
                     currentXmlObject = currentXmlObject.getLastNode();
-                    return TAG_COMMENT;
+                    return TagFlag.Comment_Open;
                 }
 
                 else { //else if it is a normal tag :
@@ -608,7 +605,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
                     currentXmlObject = currentXmlObject.getLastNode(); //else move to the last added node and mark that as the current node.
                 }
 
-                return TAG_OPEN;
+                return TagFlag.Open;
 
             }
 
@@ -660,24 +657,24 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
                             tmp = tmp.getParentObject();
 
                         else {
-                            return TAG_USELESS;
+                            return TagFlag.Useless;
                         }
                     }
                 }
 
-                return TAG_CLOSE;
+                return TagFlag.Close;
             }
 
-            return TAG_USELESS;
+            return TagFlag.Useless;
 
         } else {
-            if ((XmlObject.HelperMethods.getXmlTagName(tag).equals("comment") || tag.equals("-->")) && XmlObject.HelperMethods.getTagState(tag) == TAG_CLOSE) {
+            if ((XmlObject.HelperMethods.getXmlTagName(tag).equals("comment") || tag.equals("-->")) && XmlObject.HelperMethods.getTagState(tag) == TagFlag.Close) {
                 isInComment = false;
                 lastXmlObject = currentXmlObject;
                 currentXmlObject = currentXmlObject.getParentObject();
-                return TAG_COMMENT_END;
+                return TagFlag.Comment_Close;
             } else {
-                return TAG_USELESS;
+                return TagFlag.Useless;
             }
         }
     }
@@ -708,62 +705,43 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
      * @param currentTagState The current tag state flag.
      * @param lastTagState The last tag state flag.
      */
-    private static void parseText(String text, int currentTagState, int lastTagState) {
+    private static void parseText(String text, TagFlag currentTagState, TagFlag lastTagState) {
 
-        if (lastTagState == TAG_OPEN) { //Open tag
+        if (lastTagState == TagFlag.Open) { //Open tag
 
-            if (currentTagState == TAG_OPEN) {
+            if (currentTagState == TagFlag.Open) {
                 currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + text;
                 currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + "{TAG}\n";
-            }
-
-            else if (currentTagState == TAG_OPEN_CLOSE) {
+            } else if (currentTagState == TagFlag.Open_Close) {
                 currentXmlObject.text = currentXmlObject.text + text;
                 currentXmlObject.text = currentXmlObject.text + "{TAG}\n";
-            }
-
-            else if (currentTagState == TAG_CLOSE) {
+            } else if (currentTagState == TagFlag.Close) {
                 lastXmlObject.text = lastXmlObject.text + text;
             }
-        }
+        } else if (lastTagState == TagFlag.Close) {
 
-        else if (lastTagState == TAG_CLOSE) {
-
-            if (currentTagState == TAG_OPEN) {
+            if (currentTagState == TagFlag.Open) {
                 currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + text;
                 currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + "{TAG}\n";
-            }
-
-            else if (currentTagState == TAG_OPEN_CLOSE) {
+            } else if (currentTagState == TagFlag.Open_Close) {
                 currentXmlObject.text = currentXmlObject.text + text;
                 currentXmlObject.text = currentXmlObject.text + "{TAG}\n";
-            }
-
-            else if (currentTagState == TAG_CLOSE) {
+            } else if (currentTagState == TagFlag.Close) {
                 lastXmlObject.text = lastXmlObject.text + text;
             }
-        }
-
-
-
-        else if (lastTagState == TAG_OPEN_CLOSE) {
-            if (currentTagState == TAG_OPEN) {
+        } else if (lastTagState == TagFlag.Open_Close) {
+            if (currentTagState == TagFlag.Open) {
                 currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + text;
                 currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + "{TAG}\n";
-            }
-
-            else if (currentTagState == TAG_OPEN_CLOSE) {
+            } else if (currentTagState == TagFlag.Open_Close) {
                 currentXmlObject.text = currentXmlObject.text + text;
                 currentXmlObject.text = currentXmlObject.text + "{TAG}\n";
-            }
-
-            else if (currentTagState == TAG_CLOSE) {
+            } else if (currentTagState == TagFlag.Close) {
                 lastXmlObject.text = lastXmlObject.text + text;
             }
         }
     }
 
-    
     public static class HelperMethods{
         /**
          * @param tag tag string
@@ -772,10 +750,10 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
          * 2 => closed tag
          * 0 => open tag
          */
-        public static int getTagState(String tag) {
-            if (tag.matches(".*\\s*/>$")) return 1;
-            else if (tag.startsWith("</") || tag.equals("-->")) return 2;
-            else return 0;
+        public static TagFlag getTagState(String tag) {
+            if (tag.matches(".*\\s*/>$")) return TagFlag.Open_Close;
+            else if (tag.startsWith("</") || tag.equals("-->")) return TagFlag.Close;
+            else return TagFlag.Open;
         }
 
         /**
