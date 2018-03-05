@@ -1,5 +1,6 @@
 package core;
 
+import abstraction.BaseTreeObject;
 import exceptions.AttributeExistsException;
 import flags.TagFlag;
 import interfaces.XmlObjectInterface;
@@ -20,7 +21,7 @@ import static helpers.Regex.*;
 /**
  * Author : Tarek Mohamed
  * 8/2/2018
- *
+ * <p>
  * This is my new core object, The XML object is intended for creating objects out of the XML scripts
  * Helping the user to make objects out of it for better usage.
  */
@@ -35,14 +36,11 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
     private XmlObject parentObject;
     private ArrayList<ObjectAttribute> attributeList;
     private ArrayList<XmlObject> nodesList;
-    private static boolean isInParsingMode = false;
-    private  static XmlObject currentXmlObject;
-    private static XmlObject lastXmlObject;
-    private static boolean isInComment = false;
 
     /**
      * A global constructor
-     * @param tagName The title of the tag
+     *
+     * @param tagName      The title of the tag
      * @param parentObject The parent tag of that tag
      */
     public XmlObject(String tagName, XmlObject parentObject) {
@@ -56,9 +54,10 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * A global constructor
-     * @param tagName The title of the tag
+     *
+     * @param tagName      The title of the tag
      * @param parentObject The parent tag of that tag
-     * @param text The text that should be in that tag
+     * @param text         The text that should be in that tag
      */
     public XmlObject(String tagName, String text, XmlObject parentObject) {
         this.tagName = tagName;
@@ -71,9 +70,10 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * A global constructor
-     * @param tagName The title of the tag
-     * @param text The text that should be in that tag
-     * @param parentObject The parent tag of that tag
+     *
+     * @param tagName       The title of the tag
+     * @param text          The text that should be in that tag
+     * @param parentObject  The parent tag of that tag
      * @param attributeList The list of attributes for this object
      */
     public XmlObject(String tagName, String text, XmlObject parentObject, ArrayList<ObjectAttribute> attributeList) {
@@ -89,6 +89,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
      * Get the type of the tag
      * 0- Open
      * 1- Open-close
+     *
      * @return An integer indicating the type of the tag
      */
     public TagFlag getTagType() {
@@ -97,6 +98,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Gets the tag name.
+     *
      * @return the tag name.
      */
     public String getTagName() {
@@ -105,6 +107,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Gets the parent of the current object.
+     *
      * @return A XML object referencing the parent object.
      */
     public XmlObject getParentObject() {
@@ -113,6 +116,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Looping through the tree to get the root object.
+     *
      * @return A XML object referencing the root object.
      */
     public XmlObject getRootObject() {
@@ -127,6 +131,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Gets the xml text.
+     *
      * @return the xml inner text with {TAG} replacing the node objects of the current object
      */
     public String getText() {
@@ -135,6 +140,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Gets the list of attributes of the object
+     *
      * @return An ArrayList of ObjectAttribute that contains the attributes of the object.
      */
     public ArrayList<ObjectAttribute> getAttributeList() {
@@ -143,6 +149,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Gets the list of child objects.
+     *
      * @return An ArrayList of XmlObject (The children of the current object).
      */
     public ArrayList<XmlObject> getXmlNodesList() {
@@ -152,6 +159,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Gets the nodes count
+     *
      * @return the number of tags within this tag
      */
     @Override
@@ -161,6 +169,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Gets a node at a known position.
+     *
      * @param position The position of the required object.
      * @return The object item in the given position.
      */
@@ -170,6 +179,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Gets the last node of the current XmlObject
+     *
      * @return A XmlObject indicating the last Object in the NodesList
      */
     public XmlObject getLastNode() {
@@ -179,18 +189,27 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
     /**
      * Adds a new node to the current object and manages the text part after adding the new object.
      * This method is used to insert a new child object to the current XmlObject.
+     *
      * @param node The new XmlObject to be added to this object.
      */
     public void addNode(XmlObject node) {
         node.parentObject = this;
         nodesList.add(node);
         tagType = TagFlag.Open;
-        if (!isInParsingMode)
+        this.text = this.text + "{TAG}\n";
+    }
+
+    private void addNode(XmlObject node, boolean addTag) {
+        node.parentObject = this;
+        nodesList.add(node);
+        tagType = TagFlag.Open;
+        if (addTag)
             this.text = this.text + "{TAG}\n";
     }
 
     /**
      * Removes a node from the current object and deletes the {TAG} from the text.
+     *
      * @param position The position of the desired XmlObject.
      */
     @Override
@@ -201,9 +220,9 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
         StringBuilder textTmp = new StringBuilder(textParts[0]);
         //The deleted node place should be less than the text parts.
 
-        if (position <= textParts.length){
-            for (int i = 1; i < textParts.length; i++){
-                if (i-1 != position) textTmp.append("{TAG}\n");
+        if (position <= textParts.length) {
+            for (int i = 1; i < textParts.length; i++) {
+                if (i - 1 != position) textTmp.append("{TAG}\n");
                 textTmp.append(textParts[i]);
             }
         }
@@ -226,14 +245,16 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Adds a new text part for the current object.
+     *
      * @param text The text part required for adding.
      */
-    public void addText(String text){
+    public void addText(String text) {
         this.text = this.text + text;
     }
 
     /**
      * Adds a new attribute to the current object.
+     *
      * @param attribute The new attribute to be added.
      */
     public void addAttribute(ObjectAttribute attribute) {
@@ -246,6 +267,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Removes an attribute by position.
+     *
      * @param position The position of the attribute to be removed.
      */
     public void removeAttribute(int position) {
@@ -254,8 +276,9 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Modifies an attribute by position.
+     *
      * @param position The position of the required attribute.
-     * @param value The new value of that attribute.
+     * @param value    The new value of that attribute.
      */
     public void modifyAttribute(int position, String value) {
         this.attributeList.get(position).setValue(value);
@@ -263,6 +286,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Gets an attribute by position
+     *
      * @param position The position of the acquired attribute.
      * @return The ObjectAttribute required.
      */
@@ -272,6 +296,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Gets an attribute by name
+     *
      * @param attributeName The name of the acquired attribute.
      * @return The ObjectAttribute required.
      */
@@ -298,7 +323,8 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
     }
 
     /**
-     *  Shows the hierarchy of the current object starting from the current object.
+     * Shows the hierarchy of the current object starting from the current object.
+     *
      * @param onTreeNodeShowingListener An event that will be triggered when a new node is shown.
      */
     public void showTreeHierarchy(BaseTreeObject.OnTreeNodeShowingListener onTreeNodeShowingListener) {
@@ -307,8 +333,9 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Protected method that defines how the showing process is done.
-     * @param startNode The start node of the showing process.
-     * @param currentNode The node that is shown currently.
+     *
+     * @param startNode    The start node of the showing process.
+     * @param currentNode  The node that is shown currently.
      * @param startSpacing The spaces (incremented by the hierarchy level).
      */
     @Override
@@ -327,9 +354,10 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Protected method that defines how the showing process is done.
-     * @param startNode The start node of the showing process.
-     * @param currentNode The node that is shown currently.
-     * @param startSpacing The spaces (incremented by the hierarchy level).
+     *
+     * @param startNode                 The start node of the showing process.
+     * @param currentNode               The node that is shown currently.
+     * @param startSpacing              The spaces (incremented by the hierarchy level).
      * @param onTreeNodeShowingListener An event that will be triggered when a new node is shown.
      */
     @Override
@@ -346,6 +374,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Overriding the toString.
+     *
      * @return A string showing the open tag of the object.
      */
     @Override
@@ -355,6 +384,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Creates the open tag for the current object with all the attributes defined.
+     *
      * @return A string containing the full open tag of the current object.
      */
     @Override
@@ -372,6 +402,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Creates the close tag for the current object.
+     *
      * @return A string containing the close tag of the current object.
      */
     @Override
@@ -384,6 +415,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Creates the open-close tag for the current object with all the attributes defined.
+     *
      * @return A string containing the full open-close tag of the current object.
      */
     @Override
@@ -400,6 +432,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
     /**
      * This method is for creating an xml script out of the current tag and all the child nodes recursively
      * and return it in a string.
+     *
      * @param depthLevel The starting depth level.
      * @return A string containing the xml script.
      */
@@ -458,7 +491,8 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Adjusts a text part according to the depth level specified and deletes the redundant spaces and new lines.
-     * @param text The text part required to be optimized.
+     *
+     * @param text       The text part required to be optimized.
      * @param depthLevel The depth level required (the number of tabs needed).
      * @return The optimized text.
      */
@@ -480,7 +514,8 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * Writes a tag at a specified depth.
-     * @param tag The tag string required to be written.
+     *
+     * @param tag        The tag string required to be written.
      * @param depthLevel The level required for the tag to be written in.
      * @return A string containing the tag written at the specified level.
      */
@@ -496,42 +531,68 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
     /**
      * A local method that parses a xml script string into the current object.
+     *
      * @param xmlScript The script required to be parsed into this object.
      */
-    public void parseXmlIntoThis(String xmlScript){
+    public void parseXmlIntoThis(String xmlScript) {
         addNode(parseXml(xmlScript));
     }
 
     /**
      * The main parsing method for converting xml script into objects.
      * This method aims to convert xml scripts into XmlObject using regex.
+     *
      * @param xmlScript The script required for parsing into a new object.
      * @return An object that was created from the script.
      */
     public static XmlObject parseXml(String xmlScript) {
-        isInParsingMode = true;
+
         Matcher matcher = Pattern.compile(REGEX_TAG_ALL, Pattern.DOTALL).matcher(xmlScript);
         matcher.find();
 
-        currentXmlObject = new XmlObject(
+        XmlObject currentXmlObject = new XmlObject(
                 XmlObject.HelperMethods.getXmlTagName(matcher.group())
                 , ""
                 , null
                 , XmlObject.HelperMethods.getXmlTagAttributes(matcher.group())); //gets the first tag (<html>) and use it as the root tag.
-        lastXmlObject = null;
+
+        XmlObject lastXmlObject;
 
         int startIndex = matcher.end();
         int endIndex;
+
         TagFlag currentTagState;
-        TagFlag lastTagState = TagFlag.Open;
+
+        boolean isInComment = false;
 
         while (matcher.find()) { //for each tag exists in the html page :
 
             String tag = matcher.group(); // store the tag in a string (html tag parsing)
 
             //Step 1 : tags parsing
-            currentTagState = handleXmlTag(tag);
+            currentTagState = getTagFlag(tag, currentXmlObject, isInComment);
+
             if (currentTagState != TagFlag.Useless) {
+
+                lastXmlObject = currentXmlObject;
+
+                if (currentTagState == TagFlag.Open) {
+                    currentXmlObject.addNode(createNewObject(tag, currentXmlObject), false);
+                    currentXmlObject = currentXmlObject.getLastNode();
+                } else if (currentTagState == TagFlag.Open_Close) {
+                    currentXmlObject.addNode(createNewObject(tag, currentXmlObject), false);
+                } else if (currentTagState == TagFlag.Close) {
+                    if (currentXmlObject.getParentObject() != null)
+                        currentXmlObject = currentXmlObject.getParentObject();
+                } else if (currentTagState == TagFlag.Comment_Open) {
+                    isInComment = true;
+                    currentXmlObject.addNode(createNewObject(tag, currentXmlObject), false);
+                    currentXmlObject = currentXmlObject.getLastNode();
+                } else if (currentTagState == TagFlag.Comment_Close) {
+                    isInComment = false;
+                    if (currentXmlObject.getParentObject() != null)
+                        currentXmlObject = currentXmlObject.getParentObject();
+                }
 
                 endIndex = matcher.start();
 
@@ -540,15 +601,41 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
                 else if (currentTagState == TagFlag.Comment_Open)
                     currentTagState = TagFlag.Open;
 
-                parseText(xmlScript.substring(startIndex, endIndex), currentTagState, lastTagState);
+                String text = xmlScript.substring(startIndex, endIndex);
+
+                if (currentTagState == TagFlag.Open) {
+                    currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + text;
+                    currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + "{TAG}\n";
+                } else if (currentTagState == TagFlag.Open_Close) {
+                    currentXmlObject.text = currentXmlObject.text + text;
+                    currentXmlObject.text = currentXmlObject.text + "{TAG}\n";
+                } else if (currentTagState == TagFlag.Close) {
+                    lastXmlObject.text = lastXmlObject.text + text;
+                }
+
                 startIndex = matcher.end();
-                lastTagState = currentTagState;
             }
 
         }
 
-        isInParsingMode = false;
+        while (currentXmlObject.getParentObject() != null)
+            currentXmlObject = currentXmlObject.getParentObject();
+
         return currentXmlObject;
+    }
+
+    /**
+     * A method for creating a new XmlObject out of a tag string.
+     *
+     * @param tag              The text of the tag.
+     * @param currentXmlObject The current object that should be the parent of the new tag object.
+     * @return The new xml object.
+     */
+    public static XmlObject createNewObject(String tag, XmlObject currentXmlObject) {
+        return new XmlObject(XmlObject.HelperMethods.getXmlTagName(tag)
+                , ""
+                , currentXmlObject
+                , XmlObject.HelperMethods.getXmlTagAttributes(tag));
     }
 
     /**
@@ -562,116 +649,44 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
      * 2 : close
      * 3 : comment-open
      * 4 : comment-close
+     *
      * @param tag The tag string required for handling.
+     * @param currentXmlObject The current tag object.
      * @return An integer indicating the current tag flag.
      */
-    private static TagFlag handleXmlTag(String tag) {
-
+    public static TagFlag getTagFlag(String tag, XmlObject currentXmlObject, boolean isInComment) {
         if (!isInComment) {
 
             //Step 1-A : Opened-Closed tags
-            if (tag.matches(REGEX_TAG_OPEN_CLOSED)) { //if it ends with /> :
-                currentXmlObject.addNode( // add it to the current html object and stay on the current object.
-                        new XmlObject(XmlObject.HelperMethods.getXmlTagName(tag)
-                                , ""
-                                , currentXmlObject
-                                , XmlObject.HelperMethods.getXmlTagAttributes(tag)));
-
+            if (tag.matches(REGEX_TAG_OPEN_CLOSED))
                 return TagFlag.Open_Close;
-            }
 
-            //Step 1-B : Opened tags
-            else if (tag.matches(REGEX_TAG_OPEN)) { //if the tag is the open tag (<tag>):
+            else if (tag.matches(REGEX_TAG_OPEN)) {
 
-                //saving the current html object
-                lastXmlObject = currentXmlObject;
-
-                //if it is the comment tag :
-                //activate the isInComment bool and mark it as a comment tag.
-                if (XmlObject.HelperMethods.getXmlTagName(tag).toLowerCase().equals("comment") || tag.equals("<!--")) {
-                    isInComment = true;
-                    currentXmlObject.addNode(new XmlObject("comment", "", currentXmlObject, new ArrayList<>()));
-                    currentXmlObject = currentXmlObject.getLastNode();
+                if (XmlObject.HelperMethods.getXmlTagName(tag).toLowerCase().equals("comment") || tag.equals("<!--"))
                     return TagFlag.Comment_Open;
-                }
 
-                else { //else if it is a normal tag :
-                    currentXmlObject.addNode( //mark it as a tag.
-                            new XmlObject(XmlObject.HelperMethods.getXmlTagName(tag)
-                                    , ""
-                                    , currentXmlObject
-                                    , XmlObject.HelperMethods.getXmlTagAttributes(tag)));
+                else
+                    return TagFlag.Open;
 
-                    currentXmlObject = currentXmlObject.getLastNode(); //else move to the last added node and mark that as the current node.
-                }
+            } else if (tag.matches(REGEX_TAG_CLOSE)) {
 
-                return TagFlag.Open;
-
-            }
-
-            //if it is a close tag :
-            else if (tag.matches(REGEX_TAG_CLOSE)) {
-
-                //if the closing tag matches the current tag :
-                // if it is not the root object :
-                //return to the parent object
-                if (XmlObject.HelperMethods.getXmlTagName(tag).equals(currentXmlObject.getTagName())) {
-                    lastXmlObject = currentXmlObject;
-                    if (currentXmlObject.getParentObject() != null)
-                        currentXmlObject = currentXmlObject.getParentObject();
-                }
-
-                //else if the closing tag doesn't match the current tag :
-                //Make a tmp object for searching for the right tag
-                // And while true :
-                //If the right tag is found :
-                //If it is not the root tag :
-                //Make the current object the parent of that object.
-                //And end the search.
-                //Else if it is the root tag :
-                //Make the current tag is the root tag.
-                //And end the search.
-                //Else :
-                //If it is not the root object (more tags to search in) :
-                //Make the tmp point to the parent tag.
-                //Else if the tmp points to the root tag (useless closing tag without an opening tag) :
-                //Mark this tag as useless tag!
-                //Then ends the search.
-                else {
-
+                if (!XmlObject.HelperMethods.getXmlTagName(tag).equals(currentXmlObject.getTagName())) {
                     XmlObject tmp = currentXmlObject;
                     while (true) {
-                        if (XmlObject.HelperMethods.getXmlTagName(tag).equals(tmp.getTagName())) {
-                            lastXmlObject = currentXmlObject;
+                        if (XmlObject.HelperMethods.getXmlTagName(tag).equals(tmp.getTagName())) return TagFlag.Close;
 
-                            if (tmp.getParentObject() != null)
-                                currentXmlObject = tmp.getParentObject();
+                        if (tmp.getParentObject() != null) tmp = tmp.getParentObject();
 
-                            else
-                                currentXmlObject = tmp;
-
-                            break;
-                        }
-
-                        if (tmp.getParentObject() != null)
-                            tmp = tmp.getParentObject();
-
-                        else {
-                            return TagFlag.Useless;
-                        }
+                        else return TagFlag.Useless;
                     }
-                }
-
-                return TagFlag.Close;
+                } else return TagFlag.Close;
             }
 
             return TagFlag.Useless;
 
         } else {
             if ((XmlObject.HelperMethods.getXmlTagName(tag).equals("comment") || tag.equals("-->")) && XmlObject.HelperMethods.getTagState(tag) == TagFlag.Close) {
-                isInComment = false;
-                lastXmlObject = currentXmlObject;
-                currentXmlObject = currentXmlObject.getParentObject();
                 return TagFlag.Comment_Close;
             } else {
                 return TagFlag.Useless;
@@ -679,70 +694,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
         }
     }
 
-    /**
-     * A method to parse a text part.
-     * Starts triggering after the second tag is parsed.
-     * It takes the text between the current and last tag and stores it in it's right tag.
-     * The text is stored depending on the current and last tag states.
-     * Description :
-     *
-     * case number : last tag state, current tag state : stored in
-     *
-     * case 1 : open, open : stored in the parent of the current tag.
-     * case 2 : open, open-close : stored in the current tag.
-     * case 3 : open, close : stored in the last(closed) tag.
-     *
-     * case 4 : close, open : stored in the parent of the current tag.
-     * case 5 : close, open-close : stored in the current tag.
-     * case 6 : close, close : stored in the last(closed) tag.
-     *
-     * case 7 : open-close, open : stored in the parent of the current tag.
-     * case 8 : open-close, open-close : stored in the current tag.
-     * case 9 : open-close, close : stored in the last(closed) tag.
-     *
-     *
-     * @param text The text required to be parsed.
-     * @param currentTagState The current tag state flag.
-     * @param lastTagState The last tag state flag.
-     */
-    private static void parseText(String text, TagFlag currentTagState, TagFlag lastTagState) {
-
-        if (lastTagState == TagFlag.Open) { //Open tag
-
-            if (currentTagState == TagFlag.Open) {
-                currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + text;
-                currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + "{TAG}\n";
-            } else if (currentTagState == TagFlag.Open_Close) {
-                currentXmlObject.text = currentXmlObject.text + text;
-                currentXmlObject.text = currentXmlObject.text + "{TAG}\n";
-            } else if (currentTagState == TagFlag.Close) {
-                lastXmlObject.text = lastXmlObject.text + text;
-            }
-        } else if (lastTagState == TagFlag.Close) {
-
-            if (currentTagState == TagFlag.Open) {
-                currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + text;
-                currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + "{TAG}\n";
-            } else if (currentTagState == TagFlag.Open_Close) {
-                currentXmlObject.text = currentXmlObject.text + text;
-                currentXmlObject.text = currentXmlObject.text + "{TAG}\n";
-            } else if (currentTagState == TagFlag.Close) {
-                lastXmlObject.text = lastXmlObject.text + text;
-            }
-        } else if (lastTagState == TagFlag.Open_Close) {
-            if (currentTagState == TagFlag.Open) {
-                currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + text;
-                currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + "{TAG}\n";
-            } else if (currentTagState == TagFlag.Open_Close) {
-                currentXmlObject.text = currentXmlObject.text + text;
-                currentXmlObject.text = currentXmlObject.text + "{TAG}\n";
-            } else if (currentTagState == TagFlag.Close) {
-                lastXmlObject.text = lastXmlObject.text + text;
-            }
-        }
-    }
-
-    public static class HelperMethods{
+    public static class HelperMethods {
         /**
          * @param tag tag string
          * @return integer representing the state of the current tag
@@ -876,7 +828,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
         }
     }
 
-    public static class ObjectAttribute{
+    public static class ObjectAttribute {
         String name;
         String value;
 

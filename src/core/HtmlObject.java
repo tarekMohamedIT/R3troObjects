@@ -1,12 +1,13 @@
 package core;
 
+import abstraction.BaseTreeObject;
 import exceptions.AttributeExistsException;
+import helpers.Regex;
+import helpers.TagFlags;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import helpers.Regex;
-import helpers.TagFlags;
 
 /**
  * Created by tarek on 6/29/17.

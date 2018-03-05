@@ -1,6 +1,6 @@
 package interfaces;
 
-import core.BaseTreeObject;
+import abstraction.BaseTreeObject;
 
 public interface XmlObjectInterface <T extends BaseTreeObject>
 {
