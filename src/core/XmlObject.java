@@ -193,10 +193,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
      * @param node The new XmlObject to be added to this object.
      */
     public void addNode(XmlObject node) {
-        node.parentObject = this;
-        nodesList.add(node);
-        tagType = TagFlag.Open;
-        this.text = this.text + "{TAG}\n";
+        addNode(node, true);
     }
 
     private void addNode(XmlObject node, boolean addTag) {
