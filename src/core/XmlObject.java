@@ -569,6 +569,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
             //Step 1 : tags parsing
             currentTagState = getTagFlag(tag, currentXmlObject, isInComment);
 
+
             if (currentTagState != TagFlag.Useless) {
 
                 lastXmlObject = currentXmlObject;
@@ -605,9 +606,11 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
                     currentXmlObject.getParentObject().text = currentXmlObject.getParentObject().text + "{TAG}\n";
                 } else if (currentTagState == TagFlag.Open_Close) {
                     currentXmlObject.text = currentXmlObject.text + text;
+
                     currentXmlObject.text = currentXmlObject.text + "{TAG}\n";
                 } else if (currentTagState == TagFlag.Close) {
                     lastXmlObject.text = lastXmlObject.text + text;
+
                 }
 
                 startIndex = matcher.end();
@@ -668,10 +671,10 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
 
             } else if (tag.matches(REGEX_TAG_CLOSE)) {
 
-                if (!XmlObject.HelperMethods.getXmlTagName(tag).equals(currentXmlObject.getTagName())) {
+                if (!HelperMethods.getXmlTagName(tag).equals(currentXmlObject.getTagName())) {
                     XmlObject tmp = currentXmlObject;
                     while (true) {
-                        if (XmlObject.HelperMethods.getXmlTagName(tag).equals(tmp.getTagName())) return TagFlag.Close;
+                        if (HelperMethods.getXmlTagName(tag).equals(tmp.getTagName())) return TagFlag.Close;
 
                         if (tmp.getParentObject() != null) tmp = tmp.getParentObject();
 
@@ -776,7 +779,7 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlO
         public static String getXmlTagName(String htmlTag) {
             if (htmlTag.matches(REGEX_TAG_ALL)) {
                 if (htmlTag.equals("<!--") || htmlTag.equals("-->")) return "comment";
-                Matcher matcher = Pattern.compile("\\w(\\w|\\d)*").matcher(htmlTag);
+                Matcher matcher = Pattern.compile("[A-Za-z0-9\\-\\_]+").matcher(htmlTag);
                 matcher.find();
                 return matcher.group();
             }
