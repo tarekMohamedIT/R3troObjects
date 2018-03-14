@@ -25,7 +25,7 @@ import static helpers.Regex.*;
  * This is my new core object, The XML object is intended for creating objects out of the XML scripts
  * Helping the user to make objects out of it for better usage.
  */
-public class XmlObject extends BaseTreeObject implements XmlObjectInterface<XmlObject> {
+public class XmlObject extends BaseTreeObject implements XmlObjectInterface {
 
     /**
      * Section 3: The global variables

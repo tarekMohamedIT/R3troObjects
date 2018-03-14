@@ -1,8 +1,6 @@
 package interfaces;
 
-import abstraction.BaseTreeObject;
-
-public interface XmlObjectInterface <T extends BaseTreeObject>
+public interface XmlObjectInterface
 {
     String buildTagOpen();
     String buildTagClose();
