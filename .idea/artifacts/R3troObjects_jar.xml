@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="R3troObjects:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/R3troObjects_jar</output-path>
-    <root id="archive" name="R3troObjects.jar">
-      <element id="module-output" name="R3troObjects" />
-    </root>
-  </artifact>
-</component>

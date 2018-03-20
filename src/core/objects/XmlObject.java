@@ -1,8 +1,9 @@
-package core;
+package core.objects;
 
 import abstraction.BaseTreeObject;
 import exceptions.AttributeExistsException;
 import flags.TagFlag;
+import interfaces.ParserInterface;
 import interfaces.XmlObjectInterface;
 import sun.net.www.protocol.file.FileURLConnection;
 
@@ -25,10 +26,10 @@ import static helpers.Regex.*;
  * This is my new core object, The XML object is intended for creating objects out of the XML scripts
  * Helping the user to make objects out of it for better usage.
  */
-public class XmlObject extends BaseTreeObject implements XmlObjectInterface {
+public class XmlObject extends BaseTreeObject implements XmlObjectInterface, ParserInterface<Void, String> {
 
     /**
-     * Section 3: The global variables
+     * Section 1: Variables
      */
     private String text;
     private String tagName;
@@ -36,6 +37,10 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface {
     private XmlObject parentObject;
     private ArrayList<ObjectAttribute> attributeList;
     private ArrayList<XmlObject> nodesList;
+
+    /**
+     * Section 2: Constructors
+     */
 
     /**
      * A global constructor
@@ -84,6 +89,10 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface {
         this.nodesList = new ArrayList<>();
         tagType = TagFlag.Open_Close;
     }
+
+    /**
+     * Section 3: Methods
+     */
 
     /**
      * Get the type of the tag
@@ -196,6 +205,12 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface {
         addNode(node, true);
     }
 
+    /**
+     * Private method for adding an object as the current node's child.
+     *
+     * @param node The new XmlObject to be added to this object.
+     * @param addTag A boolean indicating if a {TAG} mark should be added or not.
+     */
     private void addNode(XmlObject node, boolean addTag) {
         node.parentObject = this;
         nodesList.add(node);
@@ -531,8 +546,9 @@ public class XmlObject extends BaseTreeObject implements XmlObjectInterface {
      *
      * @param xmlScript The script required to be parsed into this object.
      */
-    public void parseXmlIntoThis(String xmlScript) {
+    public Void parse(String xmlScript) {
         addNode(parseXml(xmlScript));
+        return null;
     }
 
     /**

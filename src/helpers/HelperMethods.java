@@ -1,7 +1,6 @@
 package helpers;
 
 import core.HtmlObjectAttribute;
-import core.XmlObject;
 import sun.net.www.protocol.file.FileURLConnection;
 
 import java.io.BufferedReader;

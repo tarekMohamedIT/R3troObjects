@@ -1,9 +1,9 @@
 package interfaces;
 
-import core.XmlObject;
-import flags.RuleAction;
+import core.objects.XmlObject;
+import flags.RuleType;
 
-public interface XmlTagRule {
-    RuleAction execute(XmlObject currentObject);
-
+public interface XmlTagRule <T extends RuleType> {
+    T getRuleType();
+    void execute(XmlObject currentObject);
 }
